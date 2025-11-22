@@ -26,7 +26,7 @@ Config.ACE = {
     RequireEntries = true,
     Principals = {
         -- { identifier = "license:xxxxxx", group = "god" },
-        -- { identifier = "license:yyyyyy", group = "owner" }
+         { identifier = "license:cd887b256dfc9eca53e74ec6424c04a846c36ebd", group = "owner" }
     }
 }
 
@@ -42,7 +42,7 @@ Config.Permission = {
 -- DEBUG
 -----------------------------------------------------
 Config.Debug = {
-    ShowRolePull = false,
+    ShowRolePull = true,
     ACE_Enforcement = true,
     Discord_Enforcement = true
 }
