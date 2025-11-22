@@ -10,6 +10,7 @@
 local Config = Config
 local tags = {}
 local cooldowns = {}
+print("^3[RADIANT DEBUG]^0 Bot Token Loaded (FIRST 6 CHARS):", Config.Discord.BotToken:sub(1,6))
 
 ---------------------------------------------------------------------
 --  GET LICENSE
@@ -243,26 +244,34 @@ end
 ---------------------------------------------------------------------
 --  PERMISSION CHECK
 ---------------------------------------------------------------------
+-----------------------------------------
+-- FIXED PERMISSION CHECK
+-----------------------------------------
 local function HasPermissions(src)
-    -- ACE check
-    if Config.Debug.ACE_Enforcement and
-        not IsPlayerAceAllowed(src, "group." .. Config.Permission.RequiredACE) then
-        return false
+    local requiredACE = Config.Permission.RequiredACE
+    local requiredDiscord = Config.Permission.RequiredDiscord
+
+    -- ACE CHECK
+    if Config.Debug.ACE_Enforcement then
+        if IsPlayerAceAllowed(src, "group." .. requiredACE) then
+            return true
+        end
     end
 
-    -- Discord role check
+    -- DISCORD CHECK
     if Config.Debug.Discord_Enforcement then
         local roles = GetDiscordRoles(src)
-        for _, r in ipairs(roles) do
-            if Config.Discord.RoleMap[r] == Config.Permission.RequiredDiscord then
+        for _, role in ipairs(roles) do
+            if Config.Discord.RoleMap[role] == requiredDiscord then
                 return true
             end
         end
-        return false
     end
 
-    return true
+    -- FAIL
+    return false
 end
+
 
 ---------------------------------------------------------------------
 --  PLAYER CONNECT: Load Tag + Department Auto-Tag
