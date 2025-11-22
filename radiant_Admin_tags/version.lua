@@ -20,13 +20,12 @@ local githubURL    = "https://raw.githubusercontent.com/Radiant-Development/radi
 ---------------------------------------------
 -- ANIMATED PRINT FUNCTION
 ---------------------------------------------
-local function aprint(text, delay)
-    for i = 1, #text do
-        Wait(delay or 5)
-        io.write(text:sub(i, i))
-    end
-    print("")
+-- SAFE ANIMATED PRINT (LINE-BASED, NOT CHARACTER-BASED)
+local function aprint(text)
+    Wait(50)
+    print(text)
 end
+
 
 
 ---------------------------------------------
@@ -62,8 +61,7 @@ end
 -- FINAL RADIANT PANEL PRINTER
 ---------------------------------------------
 local function radiantPanel(localVersion, latest, versionStatus, buildText)
-    print("")
-    aprint("^6████████████████████████ RADIANT DEV CHECK ████████████████████████^0", 1)
+    print("\n^6████████████████████████ RADIANT DEV CHECK ████████████████████████^0")
     print(radiantLogo)
 
     local icon_version = (versionStatus:find("Up%-to%-date") and "^2✔^0") or "^1✖^0"
@@ -74,19 +72,18 @@ local function radiantPanel(localVersion, latest, versionStatus, buildText)
         recommend = "^1⚠ RECOMMENDED UPDATE AVAILABLE — PLEASE UPDATE SOON ⚠^0"
     end
 
-    aprint("^5█^0  Resource           → ^7" .. resource, 3)
-    aprint("^5█^0  Installed Version  → ^7" .. localVersion .. " (" .. icon_version .. " " .. versionStatus .. "^0)", 3)
-    aprint("^5█^0  Latest Version     → ^7" .. latest, 3)
-    aprint("^5█^0  Game Build         → ^7" .. buildText .. " " .. icon_build, 3)
-    aprint("^5█^0  Uptime             → ^7" .. getUptime(), 3)
-    aprint("^5█^0  Support Hub        → ^7discord.gg/radiantdev", 3)
+    aprint("^5█^0  Resource           → ^7" .. resource)
+    aprint("^5█^0  Installed Version  → ^7" .. localVersion .. " (" .. icon_version .. " " .. versionStatus .. "^0)")
+    aprint("^5█^0  Latest Version     → ^7" .. latest)
+    aprint("^5█^0  Game Build         → ^7" .. buildText .. " " .. icon_build)
+    aprint("^5█^0  Uptime             → ^7" .. getUptime())
+    aprint("^5█^0  Support Hub        → ^7discord.gg/radiantdev")
 
     if recommend ~= "" then
-        aprint("^5█^0  " .. recommend, 2)
+        aprint("^5█^0  " .. recommend)
     end
 
-    aprint("^6████████████████████████ END OF STATUS ███████████████████████████^0", 1)
-    print("")
+    print("^6████████████████████████ END OF STATUS ███████████████████████████^0\n")
 end
 
 
