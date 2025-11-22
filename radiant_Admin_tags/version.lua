@@ -14,7 +14,7 @@ local resource     = GetCurrentResourceName()
 local localVersion = "1.0.0"
 
 -- ⚠️ IMPORTANT: Replace this with your RAW GitHub link!
-local githubURL    = "YOUR_RAW_GITHUB_URL/version.json"
+local githubURL    = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/refs/heads/main/radiant_Admin_tags/verson.json"
 
 
 ---------------------------------------------
