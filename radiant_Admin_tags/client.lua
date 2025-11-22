@@ -4,25 +4,28 @@ RegisterNetEvent("radiant:tags:updateAll", function(newTags)
     tags = newTags
 end)
 
+-- Only opens when command/keybind triggers it
 RegisterNetEvent("radiant:tags:openMenu", function()
     SetNuiFocus(true, true)
     SendNUIMessage({ action = "open" })
 end)
 
+-- Close callback
 RegisterNUICallback("close", function(_, cb)
     SetNuiFocus(false, false)
     cb("ok")
 end)
 
+-- Save callback
 RegisterNUICallback("saveTag", function(data, cb)
     TriggerServerEvent("radiant:tags:setTag", data.text, data.r, data.g, data.b)
     SetNuiFocus(false, false)
     cb("ok")
 end)
 
------------------------------------
--- DRAW TAG
------------------------------------
+---------------------------------------------------------
+-- DRAW TAGS ABOVE PLAYERS
+---------------------------------------------------------
 CreateThread(function()
     while true do
         Wait(0)
@@ -36,7 +39,7 @@ CreateThread(function()
                 local coords = GetEntityCoords(ped)
                 local dist = #(myCoords - coords)
 
-                if dist < 30 then
+                if dist < 35 then
                     DrawText3D(coords.x, coords.y, coords.z + 1.2, info.text, info.color)
                 end
             end
@@ -44,7 +47,7 @@ CreateThread(function()
     end
 end)
 
-function DrawText3D(x,y,z,text,color)
+function DrawText3D(x, y, z, text, color)
     local onScreen,_x,_y = World3dToScreen2d(x, y, z)
     if not onScreen then return end
 
@@ -56,5 +59,14 @@ function DrawText3D(x,y,z,text,color)
 
     BeginTextCommandDisplayText("STRING")
     AddTextComponentSubstringPlayerName(text)
-    EndTextCommandDisplayText(_x,_y)
+    EndTextCommandDisplayText(_x, _y)
 end
+
+---------------------------------------------------------
+-- KEYBIND (F7) — Opens same as /tagmenu
+---------------------------------------------------------
+RegisterCommand("tagmenu", function()
+    TriggerEvent("radiant:tags:openMenu")
+end)
+
+RegisterKeyMapping("tagmenu", "Open Overhead Tag Menu", "keyboard", "F7")
