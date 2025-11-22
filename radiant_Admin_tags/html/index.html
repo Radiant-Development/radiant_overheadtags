@@ -7,33 +7,45 @@
 
 <body>
     <div id="menu">
+
         <div class="header">Radiant Overhead Tags</div>
 
-        <label>Tag</label>
+        <!-- ROLE DROPDOWN -->
+        <label>Tag Role</label>
         <select id="roleDropdown"></select>
 
-        <label>Sub-message</label>
-        <input id="subMessage" maxlength="48" placeholder="Optional message under tag">
+        <!-- SUB-MESSAGE -->
+        <label>Extra Message (Optional)</label>
+        <input id="subMessage" maxlength="48" type="text" placeholder="Working on development…">
 
-        <label>Style</label>
+        <!-- STYLE -->
+        <label>Tag Style</label>
         <select id="style">
             <option value="solid">Solid</option>
-            <option value="lr">Left → Right Gradient</option>
+            <option value="lr">Gradient (Left → Right)</option>
         </select>
 
-        <label>Primary Color</label>
-        <input id="color1" type="color" value="#ffffff">
+        <!-- COLORS -->
+        <div class="color-section">
+            <label>Primary Color</label>
+            <input id="color1" type="color" value="#ffffff">
+        </div>
 
-        <div id="secondaryColorSection">
+        <div class="color-section" id="secondaryColorSection">
             <label>Secondary Color</label>
             <input id="color2" type="color" value="#ff0000">
         </div>
 
+        <!-- ERROR BOX -->
         <div id="errorBox"></div>
 
-        <button id="save">Save</button>
-        <button id="cancel">Cancel</button>
+        <!-- BUTTONS -->
+        <div class="button-row">
+            <button id="save">Save</button>
+            <button id="cancel">Cancel</button>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

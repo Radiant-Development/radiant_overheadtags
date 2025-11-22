@@ -1,41 +1,40 @@
-// ROLE DROPDOWN + MESSAGE SUPPORT + DYNAMIC POPULATION
-
-// Listen for open event from Lua
+// Listen for open event from the LUA side
 window.addEventListener("message", (event) => {
     if (event.data.action === "open") {
-
-        // Show menu
         document.getElementById("menu").style.display = "block";
         document.getElementById("errorBox").innerText = "";
 
-        // Populate role dropdown
-        const roles = event.data.roles || [];
         const dropdown = document.getElementById("roleDropdown");
-        dropdown.innerHTML = ""; // clear old
+        dropdown.innerHTML = "";
+
+        const roles = event.data.roles || [];
 
         if (roles.length === 0) {
             const opt = document.createElement("option");
-            opt.textContent = "No eligible tags available";
+            opt.textContent = "No available tags";
             opt.value = "";
             dropdown.appendChild(opt);
         } else {
             roles.forEach(role => {
                 const opt = document.createElement("option");
-                opt.value = role.value;    // The tag text (DEV, LSPD Officer)
-                opt.textContent = role.text; 
+                opt.value = role.value;
+                opt.textContent = role.text;
                 dropdown.appendChild(opt);
             });
         }
     }
 });
 
-// Close UI
+// CLOSE UI
 document.getElementById("cancel").onclick = () => {
     document.getElementById("menu").style.display = "none";
-    fetch(`https://${GetParentResourceName()}/close`, { method: "POST" });
+
+    fetch(`https://${GetParentResourceName()}/close`, {
+        method: "POST"
+    });
 };
 
-// Show/Hide secondary color picker based on style
+// SHOW/HIDE secondary color input
 document.getElementById("style").onchange = () => {
     const style = document.getElementById("style").value;
     document.getElementById("secondaryColorSection").style.display =
@@ -50,15 +49,14 @@ document.getElementById("save").onclick = () => {
     const color1 = document.getElementById("color1").value;
     const color2 = document.getElementById("color2").value;
 
-    if (!role || role.length === 0) {
-        return ShowError("You must pick a tag from the dropdown.");
+    if (!role) {
+        return ShowError("Select a role from the list.");
     }
 
     if (message.length > 48) {
         return ShowError("Sub-message cannot exceed 48 characters.");
     }
 
-    // Convert hex → RGB
     function hexToRGB(hex) {
         const n = parseInt(hex.replace("#", ""), 16);
         return {
@@ -85,7 +83,6 @@ document.getElementById("save").onclick = () => {
     document.getElementById("menu").style.display = "none";
 };
 
-// Error bubble
 function ShowError(msg) {
     document.getElementById("errorBox").innerText = msg;
 }
