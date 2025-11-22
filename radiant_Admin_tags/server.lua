@@ -38,6 +38,115 @@ local function GetDiscordRoles(src)
 
     return roles
 end
+------------------------------------------------------------------
+--  R A D I A N T   D E V  — PLAYER ROLE SYNC LOGGING SYSTEM
+------------------------------------------------------------------
+local JoinWebhook = "https://discord.com/api/webhooks/1441712129425277020/cY7qmkYveEfZrP6Ps5FnRJuNgYloHsB3qITe33y0Ld1crCH5WbbEJjyROdfcOTOFEZJJ"
+
+
+------------------------------------------------------------------
+-- DISCORD WEBHOOK SEND
+------------------------------------------------------------------
+local function SendToWebhook(title, description, color)
+    local embed = {
+        {
+            ["title"] = title,
+            ["description"] = description,
+            ["color"] = color or 16711680,
+            ["footer"] = { ["text"] = "Radiant Development • Discord Sync" },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }
+    }
+
+    PerformHttpRequest(JoinWebhook, function(err, text, headers) end, "POST", json.encode({
+        username = "RadiantDev Sync Bot",
+        embeds = embed
+    }), { ["Content-Type"] = "application/json" })
+end
+
+
+------------------------------------------------------------------
+-- BEAUTIFUL RADIANT BANNER LOG
+------------------------------------------------------------------
+local function RadiantBannerLog(src, name, mappedRoles)
+    print("^6━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+    print("^5        R A D I A N T   D E V   D I S C O R D   S Y N C^0")
+    print("^6━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+    print(("^7Player:^0 %s (^2%s^0)"):format(name, src))
+
+    if mappedRoles == "" then
+        print("^7Mapped Roles:^0 ^1None (No matching config roles)^0")
+    else
+        print("^7Mapped Roles:^0 ^3" .. mappedRoles .. "^0")
+    end
+
+    print("^6━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0\n")
+end
+
+
+------------------------------------------------------------------
+-- RAW CONSOLE LOG
+------------------------------------------------------------------
+local function BasicConsoleLog(src, name, roleList)
+    print(("[RADIANT DEV] %s (%s) connected with roles: %s"):format(
+        name, src, roleList ~= "" and roleList or "NONE"
+    ))
+end
+
+
+------------------------------------------------------------------
+-- PLAYER CONNECT EVENT — FULL ROLE SYNC SYSTEM
+------------------------------------------------------------------
+AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
+    local src = source
+
+    CreateThread(function()
+        Wait(1500)  -- ensure identifiers are loaded
+
+        local roles = GetDiscordRoles(src)
+        if not roles then
+            BasicConsoleLog(src, name, "")
+            RadiantBannerLog(src, name, "")
+            SendToWebhook(
+                "**Player Connected (No Roles Found)**",
+                ("Player: **%s** (`%s`)\nDiscord roles: **None Available**"):format(name, src),
+                16734464
+            )
+            return
+        end
+
+        local mapped = {}
+
+        for _, role in ipairs(roles) do
+            local mappedGroup = Config.Discord.RoleMap[role]
+            if mappedGroup then
+                table.insert(mapped, mappedGroup)
+            end
+        end
+
+        local mappedStr = table.concat(mapped, ", ")
+
+        ------------------------------------------------------
+        -- PRINT OUTPUTS
+        ------------------------------------------------------
+        BasicConsoleLog(src, name, mappedStr)
+        RadiantBannerLog(src, name, mappedStr)
+
+        ------------------------------------------------------
+        -- SEND DISCORD WEBHOOK
+        ------------------------------------------------------
+        SendToWebhook(
+            "Player Connected — Discord Role Sync",
+            ("Player: **%s** (`%s`)\nMapped Permissions: **%s**\nDiscord Role IDs: `%s`"):format(
+                name,
+                src,
+                mappedStr ~= "" and mappedStr or "None",
+                table.concat(roles, ", ")
+            ),
+            65280 -- green
+        )
+    end)
+end)
 
 -----------------------------------------
 -- PERMISSION CHECK
