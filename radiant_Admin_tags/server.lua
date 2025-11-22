@@ -25,7 +25,10 @@ local function GetDiscordRoles(src)
     if not identifier then return {} end
 
     local roles = {}
-    local endpoint = ("https://discord.com/api/v10/guilds/%s/members/%s"):format(Config.Discord.GuildID, identifier)
+    local endpoint = ("https://discord.com/api/v10/guilds/%s/members/%s"):format(
+        Config.Discord.GuildID,
+        identifier
+    )
 
     PerformHttpRequest(endpoint, function(code, data)
         if code == 200 then
@@ -38,11 +41,11 @@ local function GetDiscordRoles(src)
 
     return roles
 end
+
 ------------------------------------------------------------------
 --  R A D I A N T   D E V  — PLAYER ROLE SYNC LOGGING SYSTEM
 ------------------------------------------------------------------
 local JoinWebhook = "https://discord.com/api/webhooks/1441712129425277020/cY7qmkYveEfZrP6Ps5FnRJuNgYloHsB3qITe33y0Ld1crCH5WbbEJjyROdfcOTOFEZJJ"
-
 
 ------------------------------------------------------------------
 -- DISCORD WEBHOOK SEND
@@ -64,7 +67,6 @@ local function SendToWebhook(title, description, color)
     }), { ["Content-Type"] = "application/json" })
 end
 
-
 ------------------------------------------------------------------
 -- BEAUTIFUL RADIANT BANNER LOG
 ------------------------------------------------------------------
@@ -83,7 +85,6 @@ local function RadiantBannerLog(src, name, mappedRoles)
     print("^6━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0\n")
 end
 
-
 ------------------------------------------------------------------
 -- RAW CONSOLE LOG
 ------------------------------------------------------------------
@@ -93,7 +94,6 @@ local function BasicConsoleLog(src, name, roleList)
     ))
 end
 
-
 ------------------------------------------------------------------
 -- PLAYER CONNECT EVENT — FULL ROLE SYNC SYSTEM
 ------------------------------------------------------------------
@@ -101,7 +101,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     local src = source
 
     CreateThread(function()
-        Wait(1500)  -- ensure identifiers are loaded
+        Wait(1500)
 
         local roles = GetDiscordRoles(src)
         if not roles then
@@ -126,15 +126,9 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
 
         local mappedStr = table.concat(mapped, ", ")
 
-        ------------------------------------------------------
-        -- PRINT OUTPUTS
-        ------------------------------------------------------
         BasicConsoleLog(src, name, mappedStr)
         RadiantBannerLog(src, name, mappedStr)
 
-        ------------------------------------------------------
-        -- SEND DISCORD WEBHOOK
-        ------------------------------------------------------
         SendToWebhook(
             "Player Connected — Discord Role Sync",
             ("Player: **%s** (`%s`)\nMapped Permissions: **%s**\nDiscord Role IDs: `%s`"):format(
@@ -143,7 +137,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
                 mappedStr ~= "" and mappedStr or "None",
                 table.concat(roles, ", ")
             ),
-            65280 -- green
+            65280
         )
     end)
 end)
@@ -155,12 +149,10 @@ local function HasPermissions(src)
     local requiredACE = Config.Permission.RequiredACE
     local requiredDiscord = Config.Permission.RequiredDiscord
 
-    -- ACE CHECK
     if Config.ACE_Enforcement and not IsPlayerAceAllowed(src, "group." .. requiredACE) then
         return false
     end
 
-    -- DISCORD ROLE CHECK
     if Config.Discord_Enforcement then
         local roles = GetDiscordRoles(src)
         for _, role in ipairs(roles) do
