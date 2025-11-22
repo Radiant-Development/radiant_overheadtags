@@ -2,20 +2,68 @@
 -- R A D I A N T   D E V   S E R V E R
 -----------------------------------------
 
+local resource = GetCurrentResourceName()
+local localVersion = "1.0.0"
+local startTime = os.time()
+
 local Config = Config
 local tags = {}
 local cooldowns = {}
 
-print(("^3[RADIANT DEBUG]^0 Bot Token (first 6): %s"):format(Config.Discord.BotToken:sub(1, 6)))
+-----------------------------------------------------
+-- VERSION CHECK (FIXED & CLEAN)
+-----------------------------------------------------
+CreateThread(function()
+    Wait(1500)
+
+    local versionURL = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/main/version.json"
+
+    PerformHttpRequest(versionURL, function(code, body)
+        local latest = "UNKNOWN"
+        if code == 200 and body then
+            local decoded = json.decode(body)
+            latest = decoded and decoded.version or "UNKNOWN"
+        end
+
+        local statusText =
+            (latest == "UNKNOWN") and "^3UNKNOWN^0"
+            or (latest == localVersion) and "^2UP-TO-DATE ✓^0"
+            or "^3OUTDATED → UPDATE AVAILABLE^0"
+
+        local build = GetGameBuildNumber() or 0
+        local buildText =
+            (build == 0) and "^3UNKNOWN (FiveM returned nil)^0"
+            or (build < 2699) and ("^1UNSUPPORTED (must be ≥ 2699)^0")
+            or ("^2SUPPORTED (" .. build .. ")^0")
+
+        local uptime = os.time() - startTime
+        local h = math.floor(uptime / 3600)
+        local m = math.floor((uptime % 3600) / 60)
+        local s = uptime % 60
+
+        print("")
+        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("^6      🚀 R A D I A N T   D E V   V E R S I O N   C H E C K^0")
+        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print(("  Resource       ➜  ^7%s^0"):format(resource))
+        print(("  Installed      ➜  ^7%s^0"):format(localVersion))
+        print(("  Latest         ➜  ^7%s^0"):format(latest))
+        print(("  Status         ➜  %s"):format(statusText))
+        print(("  Game Build     ➜  %s"):format(buildText))
+        print(("  Uptime         ➜  %02dh %02dm %02ds^0"):format(h, m, s))
+        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("  Support ➜ ^5https://discord.gg/radiantdev^0")
+        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("")
+    end)
+end)
 
 -----------------------------------------------------
--- LICENSE IDENTIFIER
+-- GET LICENSE
 -----------------------------------------------------
 local function GetLicense(src)
     for _, id in ipairs(GetPlayerIdentifiers(src)) do
-        if id:find("license:") then
-            return id
-        end
+        if id:find("license:") then return id end
     end
     return nil
 end
@@ -34,11 +82,11 @@ local function LoadPlayerTag(license)
     if not result then return nil end
 
     return {
-        text   = result.tag_text or "",
-        color  = { result.color_r,  result.color_g,  result.color_b },
-        color2 = { result.color_r2 or result.color_r, result.color_g2 or result.color_g, result.color_b2 or result.color_b },
-        style  = result.style or "solid",
-        message = result.tag_message or ""
+        text    = result.tag_text or "",
+        message = result.tag_message or "",
+        color   = { result.color_r, result.color_g, result.color_b },
+        color2  = { result.color_r2, result.color_g2, result.color_b2 },
+        style   = result.style or "solid"
     }
 end
 
@@ -48,37 +96,36 @@ end
 local function SavePlayerTag(license, data)
     if not Config.UseSQL then return end
 
-    MySQL.update.await(
-        string.format([[
-            INSERT INTO `%s` 
-            (license, tag_text, tag_message, color_r, color_g, color_b, color_r2, color_g2, color_b2, style)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                tag_text     = VALUES(tag_text),
-                tag_message  = VALUES(tag_message),
-                color_r      = VALUES(color_r),
-                color_g      = VALUES(color_g),
-                color_b      = VALUES(color_b),
-                color_r2     = VALUES(color_r2),
-                color_g2     = VALUES(color_g2),
-                color_b2     = VALUES(color_b2),
-                style        = VALUES(style)
-        ]], Config.SQLTable),
-        {
-            license,
-            data.text,
-            data.message,
-            data.color[1], data.color[2], data.color[3],
-            data.color2[1], data.color2[2], data.color2[3],
-            data.style
-        }
-    )
+    local sql = string.format([[
+        INSERT INTO `%s`
+        (license, tag_text, tag_message, color_r, color_g, color_b, color_r2, color_g2, color_b2, style)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            tag_text    = VALUES(tag_text),
+            tag_message = VALUES(tag_message),
+            color_r     = VALUES(color_r),
+            color_g     = VALUES(color_g),
+            color_b     = VALUES(color_b),
+            color_r2    = VALUES(color_r2),
+            color_g2    = VALUES(color_g2),
+            color_b2    = VALUES(color_b2),
+            style       = VALUES(style)
+    ]], Config.SQLTable)
+
+    MySQL.update.await(sql, {
+        license,
+        data.text,
+        data.message,
+        data.color[1], data.color[2], data.color[3],
+        data.color2[1], data.color2[2], data.color2[3],
+        data.style
+    })
 end
 
 -----------------------------------------------------
--- SQL: CREATE TABLE IF NOT EXISTS
+-- SQL: CREATE TABLE
 -----------------------------------------------------
-local function CreateSQLTable()
+CreateThread(function()
     if not Config.UseSQL then return end
 
     local sql = string.format([[
@@ -99,15 +146,13 @@ local function CreateSQLTable()
 
     MySQL.query(sql)
     print("^2[RADIANT DEV]^0 SQL table verified.")
-end
-CreateSQLTable()
+end)
 
 -----------------------------------------------------
 -- DISCORD ROLE FETCH
 -----------------------------------------------------
 local function GetDiscordRoles(src)
-    local discordId = nil
-
+    local discordId
     for _, id in ipairs(GetPlayerIdentifiers(src)) do
         if id:find("discord:") then
             discordId = id:gsub("discord:", "")
@@ -115,10 +160,7 @@ local function GetDiscordRoles(src)
         end
     end
 
-    if not discordId then
-        print("^1[DISCORD]^0 no discord identifier found")
-        return {}
-    end
+    if not discordId then return {} end
 
     local url = ("https://discord.com/api/v10/guilds/%s/members/%s"):
         format(Config.Discord.GuildID, discordId)
@@ -126,22 +168,12 @@ local function GetDiscordRoles(src)
     local p = promise.new()
 
     PerformHttpRequest(url, function(code, data)
-        if Config.Debug.ShowRolePull then
-            print("^3[DISCORD]^0 HTTP:", code)
-            print("^3[DISCORD]^0 RESP:", data)
-        end
-
         if code ~= 200 then
             p:resolve({})
             return
         end
-
         local decoded = json.decode(data or "{}")
-        if decoded and decoded.roles then
-            p:resolve(decoded.roles)
-        else
-            p:resolve({})
-        end
+        p:resolve(decoded and decoded.roles or {})
     end, "GET", "", {
         ["Authorization"] = "Bot " .. Config.Discord.BotToken
     })
@@ -150,57 +182,16 @@ local function GetDiscordRoles(src)
 end
 
 -----------------------------------------------------
--- STYLE PRIORITY ENGINE
------------------------------------------------------
-local function ResolveStyle(src, uiStyle)
-    local roles = GetDiscordRoles(src)
-
-    -- ACE override
-    for group, forced in pairs(Config.ACEStyleMap) do
-        if IsPlayerAceAllowed(src, "group." .. group) then
-            return forced
-        end
-    end
-
-    -- Discord override
-    for _, r in ipairs(roles) do
-        if Config.DiscordStyleMap[r] then
-            return Config.DiscordStyleMap[r]
-        end
-    end
-
-    return uiStyle or Config.DefaultTagStyle or "solid"
-end
-
------------------------------------------------------
--- DEPARTMENT AUTO-TAG TEXT
------------------------------------------------------
-local function ResolveDepartmentTag(src)
-    local roles = GetDiscordRoles(src)
-    for _, r in ipairs(roles) do
-        if Config.DepartmentAutoTags[r] then
-            return Config.DepartmentAutoTags[r]
-        end
-    end
-    return nil
-end
-
------------------------------------------------------
 -- PERMISSION CHECK
 -----------------------------------------------------
 local function HasPermissions(src)
-    if Config.Debug.ACE_Enforcement then
-        if IsPlayerAceAllowed(src, "group." .. Config.Permission.RequiredACE) then
-            return true
-        end
-    end
+    local requiredACE = Config.Permission.RequiredACE
+    if IsPlayerAceAllowed(src, "group." .. requiredACE) then return true end
 
-    if Config.Debug.Discord_Enforcement then
-        local roles = GetDiscordRoles(src)
-        for _, r in ipairs(roles) do
-            if Config.Discord.RoleMap[r] == Config.Permission.RequiredDiscord then
-                return true
-            end
+    local roles = GetDiscordRoles(src)
+    for _, r in ipairs(roles) do
+        if Config.Discord.RoleMap[r] == Config.Permission.RequiredDiscord then
+            return true
         end
     end
 
@@ -215,135 +206,45 @@ AddEventHandler("playerConnecting", function()
     local license = GetLicense(src)
 
     CreateThread(function()
-        Wait(800)
+        Wait(500)
 
-        if Config.UseSQL and license then
-            tags[src] = LoadPlayerTag(license) or {}
-        end
-
-        -- Auto-tag based on department
-        local dept = ResolveDepartmentTag(src)
-        if dept then
-            tags[src] = tags[src] or {}
-            tags[src].text = dept
-        end
+        tags[src] = LoadPlayerTag(license) or {}
 
         TriggerClientEvent("radiant:tags:updateAll", -1, tags)
     end)
 end)
 
 -----------------------------------------------------
--- /tagmenu COMMAND
+-- TAG MENU COMMAND
 -----------------------------------------------------
 RegisterCommand("tagmenu", function(src)
     if not HasPermissions(src) then
-        TriggerClientEvent("chat:addMessage", src,
-            { args = { "^1SYSTEM", "You do not have permission." } })
+        TriggerClientEvent("chat:addMessage", src, { args = {"^1SYSTEM", "No permission."} })
         return
     end
 
-    -- send roles → UI
-    local roles = GetDiscordRoles(src)
-    local send = {}
-
-    for _, r in ipairs(roles) do
-        if Config.RoleText and Config.RoleText[r] then
-            table.insert(send, {
-                value = Config.RoleText[r],
-                text = Config.RoleText[r]
-            })
-        end
-    end
-
-    TriggerClientEvent("radiant:tags:openMenu", src, send)
+    TriggerClientEvent("radiant:tags:openMenu", src)
 end)
 
 -----------------------------------------------------
--- SAVE TAG
+-- SAVE TAG FROM UI
 -----------------------------------------------------
 RegisterNetEvent("radiant:tags:setTag", function(payload)
     local src = source
     local license = GetLicense(src)
-    local now = os.time()
-
-    -- cooldown
-    if cooldowns[src] and (now - cooldowns[src] < Config.TagChangeCooldown) then
-        return
-    end
-    cooldowns[src] = now
-
-    local uiStyle = payload.style
-    local resolvedStyle = ResolveStyle(src, uiStyle)
 
     tags[src] = {
-        text    = payload.role,         -- selected role text
-        message = payload.message or "",-- sub-message
-        color   = { payload.r,  payload.g,  payload.b },
-        color2  = { payload.r2 or payload.r, payload.g2 or payload.g, payload.b2 or payload.b },
-        style   = resolvedStyle
+        text    = payload.role,
+        message = payload.message,
+        color   = { payload.r, payload.g, payload.b },
+        color2  = { payload.r2, payload.g2, payload.b2 },
+        style   = payload.style
     }
 
-    if Config.UseSQL and license then
+    if Config.UseSQL then
         SavePlayerTag(license, tags[src])
     end
 
-    TriggerClientEvent("radiant:tags:updateAll", -1, tags)
-end)
-
------------------------------------------------------
--- ADMIN COMMANDS
------------------------------------------------------
-
--- Force text override
-RegisterCommand("tagforce", function(src, args)
-    if not IsPlayerAceAllowed(src, "group.owner") then return end
-
-    local id   = tonumber(args[1])
-    local text = table.concat(args, " ", 2)
-
-    if not id or not text then return end
-
-    tags[id] = tags[id] or {}
-    tags[id].text = text
-    TriggerClientEvent("radiant:tags:updateAll", -1, tags)
-end)
-
--- Force style
-RegisterCommand("tagstyle", function(src, args)
-    if not IsPlayerAceAllowed(src, "group.owner") then return end
-
-    local id    = tonumber(args[1])
-    local style = args[2]
-
-    if not id or not style then return end
-
-    tags[id] = tags[id] or {}
-    tags[id].style = style
-    TriggerClientEvent("radiant:tags:updateAll", -1, tags)
-end)
-
--- Reload tags
-RegisterCommand("tagreload", function(src)
-    if not IsPlayerAceAllowed(src, "group.admin") then return end
-    TriggerClientEvent("radiant:tags:updateAll", -1, tags)
-end)
-
--- Reset tag
-RegisterCommand("tagreset", function(src, args)
-    if not IsPlayerAceAllowed(src, "group.admin") then return end
-
-    local id = tonumber(args[1])
-    if not id then return end
-
-    tags[id] = nil
-    TriggerClientEvent("radiant:tags:updateAll", -1, tags)
-end)
-
--- Wipe all tags
-RegisterCommand("tagwipeall", function(src)
-    if not IsPlayerAceAllowed(src, "group.owner") then return end
-
-    tags = {}
     TriggerClientEvent("radiant:tags:updateAll", -1, tags)
 end)
 
@@ -354,5 +255,3 @@ AddEventHandler("playerDropped", function()
     tags[source] = nil
     TriggerClientEvent("radiant:tags:updateAll", -1, tags)
 end)
-
-   
