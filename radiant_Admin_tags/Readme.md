@@ -89,3 +89,7 @@ Inside `config.lua`:
 ```lua
 Config.Discord.BotToken = "YOUR_BOT_TOKEN"
 Config.Discord.GuildID = "YOUR_DISCORD_ID"
+# 📙 **2. Permissions.md**
+--add this to your server config--
+--add_principal identifier.discord:654859497373827073 group.god--
+--add_ace group.god radiant.tags allow--

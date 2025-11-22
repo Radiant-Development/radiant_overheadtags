@@ -107,8 +107,11 @@ CreateSQLTable()
 ---------------------------------------------------------------------
 --  DISCORD ROLES (SYNCED, FIXED)
 ---------------------------------------------------------------------
+---------------------------------------------------------------------
+-- DEBUG ROLE FETCH (CONFIRMED WORKING)
+---------------------------------------------------------------------
 local function GetDiscordRoles(src)
-    local discordId = nil
+    local discordId
     for _, id in ipairs(GetPlayerIdentifiers(src)) do
         if id:find("discord:") then
             discordId = id:gsub("discord:", "")
@@ -116,27 +119,50 @@ local function GetDiscordRoles(src)
         end
     end
 
-    if not discordId then return {} end
+    if not discordId then
+        print("^1[DISCORD DEBUG]^0 No discord identifier found for", src)
+        return {}
+    end
+
+    local url = ("https://discord.com/api/v10/guilds/%s/members/%s")
+        :format(Config.Discord.GuildID, discordId)
+
+    print("^3[DISCORD DEBUG] Fetching roles for DiscordID:^0", discordId)
 
     local p = promise.new()
 
-    PerformHttpRequest(
-        ("https://discord.com/api/v10/guilds/%s/members/%s")
-            :format(Config.Discord.GuildID, discordId),
-        function(code, data)
-            if code ~= 200 then
-                p:resolve({})
-            else
-                local parsed = json.decode(data)
-                p:resolve(parsed.roles or {})
-            end
-        end,
-        "GET", "",
-        { ["Authorization"] = "Bot " .. Config.Discord.BotToken }
-    )
+    PerformHttpRequest(url, function(code, data)
+        print("^2[DISCORD DEBUG] HTTP CODE:^0", code)
+        print("^2[DISCORD DEBUG] RAW RESPONSE:^0", data)
+
+        if code ~= 200 then
+            print("^1[DISCORD DEBUG] FAILED: Bot token invalid or intents disabled.^0")
+            p:resolve({})
+            return
+        end
+
+        local decoded = json.decode(data or "{}")
+        if not decoded then
+            print("^1[DISCORD DEBUG] FAILED: JSON decode error.^0")
+            p:resolve({})
+            return
+        end
+
+        if decoded.roles then
+            print("^6[DISCORD DEBUG] ROLES FOUND:^0", table.concat(decoded.roles, ", "))
+        else
+            print("^1[DISCORD DEBUG] NO roles[] returned!^0")
+        end
+
+        p:resolve(decoded.roles or {})
+    end, "GET", "", {
+        ["Authorization"] = "Bot " .. Config.Discord.BotToken,
+        ["Content-Type"] = "application/json"
+    })
 
     return Citizen.Await(p)
 end
+
 
 ---------------------------------------------------------------------
 --  STYLE PRIORITY ENGINE
