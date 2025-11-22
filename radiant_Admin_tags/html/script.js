@@ -1,8 +1,31 @@
+// ROLE DROPDOWN + MESSAGE SUPPORT + DYNAMIC POPULATION
+
 // Listen for open event from Lua
 window.addEventListener("message", (event) => {
     if (event.data.action === "open") {
+
+        // Show menu
         document.getElementById("menu").style.display = "block";
         document.getElementById("errorBox").innerText = "";
+
+        // Populate role dropdown
+        const roles = event.data.roles || [];
+        const dropdown = document.getElementById("roleDropdown");
+        dropdown.innerHTML = ""; // clear old
+
+        if (roles.length === 0) {
+            const opt = document.createElement("option");
+            opt.textContent = "No eligible tags available";
+            opt.value = "";
+            dropdown.appendChild(opt);
+        } else {
+            roles.forEach(role => {
+                const opt = document.createElement("option");
+                opt.value = role.value;    // The tag text (DEV, LSPD Officer)
+                opt.textContent = role.text; 
+                dropdown.appendChild(opt);
+            });
+        }
     }
 });
 
@@ -21,17 +44,18 @@ document.getElementById("style").onchange = () => {
 
 // Save Tag
 document.getElementById("save").onclick = () => {
-    const text = document.getElementById("tagText").value.trim();
+    const role = document.getElementById("roleDropdown").value.trim();
+    const message = document.getElementById("subMessage").value.trim();
     const style = document.getElementById("style").value;
     const color1 = document.getElementById("color1").value;
     const color2 = document.getElementById("color2").value;
 
-    // Input validation
-    if (text.length === 0) {
-        return ShowError("Tag text cannot be empty.");
+    if (!role || role.length === 0) {
+        return ShowError("You must pick a tag from the dropdown.");
     }
-    if (text.length > 24) {
-        return ShowError("Tag cannot exceed 24 characters.");
+
+    if (message.length > 48) {
+        return ShowError("Sub-message cannot exceed 48 characters.");
     }
 
     // Convert hex → RGB
@@ -50,7 +74,8 @@ document.getElementById("save").onclick = () => {
     fetch(`https://${GetParentResourceName()}/saveTag`, {
         method: "POST",
         body: JSON.stringify({
-            text,
+            role,
+            message,
             style,
             r: c1.r, g: c1.g, b: c1.b,
             r2: c2.r, g2: c2.g, b2: c2.b
