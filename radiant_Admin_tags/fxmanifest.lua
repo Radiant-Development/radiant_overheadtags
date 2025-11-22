@@ -2,34 +2,43 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-name 'radiant_overheadtags'
+name 'radiant_Admin_tags'
 author 'Radiant Development'
-description 'Standalone Overhead Tag System with Discord Roles + ACE + RadiantDev Version Panel'
+description 'Radiant Overhead Tags System (Solid + LR Gradient)'
 version '1.0.0'
 
-ui_page 'html/index.html'
+--------------------------------------------------------------------
+-- ESCROW IGNORE — ONLY CONFIG IS EDITABLE
+--------------------------------------------------------------------
+escrow_ignore {
+    'config.lua',
+}
 
+--------------------------------------------------------------------
+-- FILES
+--------------------------------------------------------------------
 files {
     'html/index.html',
     'html/style.css',
     'html/script.js'
 }
 
-client_scripts {
-    'config.lua',
-    'client.lua'
-}
+ui_page 'html/index.html'
 
+--------------------------------------------------------------------
+-- SERVER SCRIPTS
+--------------------------------------------------------------------
 server_scripts {
-    'config.lua',
+    '@oxmysql/lib/MySQL.lua',
+    'config.lua',      -- must load BEFORE server.lua
     'version.lua',
     'server.lua'
 }
 
-escrow_ignore {
-    "config.lua",
-    "version.lua",
-    "*.json",
-    "html/**",
-    "docs/**"
+--------------------------------------------------------------------
+-- CLIENT SCRIPTS
+--------------------------------------------------------------------
+client_scripts {
+    'config.lua',
+    'client.lua'
 }

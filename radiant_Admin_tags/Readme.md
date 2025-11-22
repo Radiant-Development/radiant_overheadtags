@@ -1,70 +1,91 @@
-# 🌟 Radiant Development — Overhead Tag System  
-Standalone • Discord Role Sync • ACE Enforcement • NUI • Version Checker
+# 🌟 RadiantDev Overhead Tags  
+**Solid Color + Left→Right Gradient • SQL Persistence • Discord Sync • ACE Permissions**
 
-Welcome to the **RadiantDev Overhead Tag System**, a fully standalone overhead-tag resource powered by:
-
-- Discord role authentication  
-- ACE permission groups  
-- RadiantDev’s animated, glowing version panel  
-- Modern UI for tag editing  
-- Escrow-safe configuration  
-- Automatic GitHub version checks  
-- Build 2699+ enforcement  
-
-This resource follows the full **RadiantDev Master Prompt standard**.
+Welcome to the official **Radiant Development Overhead Tag System**.  
+This script provides a safe, stylish, and highly optimized overhead tag solution for FiveM servers.
 
 ---
 
-# 📌 1. Requirements
+## 🚀 Features
 
-Before installing this script, make sure you have:
+### 🎨 Tag Styles
+- **Solid mode**
+- **Left → Right gradient mode**
+- Dual-color gradient support
+- Smooth 3D rendering
+- Line-of-sight visibility
+- Distance fade-out
+- F6 Toggle visibility
 
-- **FiveM server build ≥ 2699**  
-- **A Discord Bot** created in the Developer Portal  
-- Your server's **Discord Guild ID**  
-- **Role IDs** for permission mapping  
-- The correct **ACE identifiers** for your staff team  
+### 🔐 Permission System
+- ACE group requirement  
+- Discord role requirement  
+- Server owners can adjust ONLY `config.lua`
 
-If any of these are missing, the resource will refuse to load.
+### 🧠 Smart Logic
+- ACE → Discord → Department → Default → UI priority  
+- Department auto-tags  
+- Cooldown per player  
+- Dynamic tag updating  
+- Server-wide instant refresh
+
+### 💾 SQL Support
+- Permanent tag storage  
+- Style + color + gradient saved  
+- Auto-table creation
+
+### 🌐 Discord Integration
+- Role-based permissions  
+- Role sync logging  
+- Tag change webhook logging
 
 ---
 
-# 🚀 2. Installing the Resource
+## 📂 Resource Structure
 
-1. Download or clone the script into your resources folder.  
-2. Ensure it in your `server.cfg`:
-
-3. Configure everything inside **config.lua** (directions below).  
-4. Restart the server.
 
 ---
 
-# 🤖 3. Creating a Discord Bot
+## ⚙️ Installation
 
-A Discord bot **is required** for the script to read player roles.
+1. Drag folder into your server resources.  
+2. Add to **server.cfg**:
 
-### ✔ Step 1 — Create the Application
 
-1. Go to: https://discord.com/developers/applications  
-2. Click **New Application**  
-3. Name it:  
-   `RadiantDev Overhead Tags Bot`  
-4. Save.
+3. Configure `config.lua` (ONLY editable file).  
+4. Import `radiant_tags.sql` into your database.  
+5. Restart your server.
 
-### ✔ Step 2 — Add a Bot User
+---
 
-1. Go to the **Bot** tab  
-2. Click **Add Bot**  
-3. Enable:  
-   - “MESSAGE CONTENT INTENT”  
-   - “SERVER MEMBERS INTENT”
+## 🛂 Permissions
 
-### ✔ Step 3 — Get Your Bot Token
+### **ACE Example**
 
-Under **Bot → Token**:
-
-Click **Reset Token** → Copy it → Paste it into `config.lua`:
-
+### **Discord Role Map**
+Inside `config.lua`:
 ```lua
-Config.Discord.BotToken = "YOUR_BOT_TOKEN_HERE"
+Config.Discord.RoleMap = {
+    ["123456789012345678"] = "god",
+}
+/tagmenu
+exports['radiant_Admin_tags']:SetPlayerTag(id, data)
 
+---
+
+# 📙 **2. INSTALLATION.md**
+
+```md
+# Installation Guide — RadiantDev Overhead Tags
+
+## 1. Drag & Drop
+Place the entire `radiant_Admin_tags` folder into your server's resources directory.
+
+## 2. Start the Resource
+Add to server.cfg:
+
+## 3. Configure Your Bot
+Inside `config.lua`:
+```lua
+Config.Discord.BotToken = "YOUR_BOT_TOKEN"
+Config.Discord.GuildID = "YOUR_DISCORD_ID"

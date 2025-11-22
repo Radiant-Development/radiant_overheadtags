@@ -1,78 +1,95 @@
 -----------------------------------------
 -- R A D I A N T   D E V   C O N F I G
--- CLEAN FIXED VERSION
+-- FULL-SYSTEM UPGRADE (MODIFIED VERSION)
 -----------------------------------------
 
 Config = {}
 
 -----------------------------------------------------
--- 1. DISCORD BOT SETTINGS
+-- DISCORD BOT SETTINGS
 -----------------------------------------------------
 Config.Discord = {
-    BotToken = "PUT_YOUR_DISCORD_BOT_TOKEN_HERE",
+    BotToken = "PUT_YOUR_BOT_TOKEN_HERE",
     GuildID  = "YOUR_GUILD_ID",
 
     -- Map Discord Role IDs to permission groups
     RoleMap = {
-        -- ["ROLE_ID"] = "groupname",
-        -- Example:
-        -- ["123456789012345678"] = "god",
-        -- ["987654321987654321"] = "admin",
+        -- ["DiscordRoleID"] = "permission_group"
+        ["000000000000000000"] = "god",
+        -- keep any of your existing entries here
     }
 }
 
 -----------------------------------------------------
--- 2. ACE PERMISSION SETTINGS
+-- ACE PERMISSIONS
 -----------------------------------------------------
 Config.ACE = {
     RequireEntries = true,
 
-    -- Add player license identifiers here
     Principals = {
-        -- { identifier = "license:xxxxxx", group = "god" },
-        -- { identifier = "license:yyyyyy", group = "owner" },
+        -- { identifier = "license:xxxx", group = "god" },
+        -- keep your existing entries
     }
 }
 
 -----------------------------------------------------
--- 3. TAG PERMISSION REQUIREMENTS
+-- TAG SYSTEM PERMISSION REQUIREMENTS
 -----------------------------------------------------
 Config.Permission = {
-    RequiredACE = "god",        -- ACE group required to use /tagmenu
-    RequiredDiscord = "god"     -- Discord role required to use the menu
+    RequiredACE = "god",        -- ACE group required to open /tagmenu
+    RequiredDiscord = "god"     -- Discord group required to access UI
 }
 
 -----------------------------------------------------
--- 4. DEBUG OPTIONS
+-- DEBUG SETTINGS
 -----------------------------------------------------
 Config.Debug = {
-    ShowRolePull = false,
+    ShowRolePull = true,
     ACE_Enforcement = true,
     Discord_Enforcement = true
 }
 
 -----------------------------------------------------
--- 5. UPCOMING ADVANCED TAG SYSTEM SETTINGS
--- (These will be used when we install the full upgrade)
+-- TAG LENGTH, COOLDOWN, DISTANCE
 -----------------------------------------------------
-
--- Max characters allowed for a tag
+-- Maximum tag text length
 Config.MaxTagLength = 24
 
--- Cooldown for how often players may change tags
+-- Cooldown between tag changes
 Config.TagChangeCooldown = 5   -- seconds
 
--- Draw distance for 3D rendering
+-- Maximum draw distance for tags
 Config.DrawDistance = 35.0
 
--- Default style if no Discord / ACE override is applied
--- Options will include: "solid", "lr", "tb", "outline", "pulse"
+-- Only show tag when the player is LOOKING at another player
+Config.RequireLineOfSight = true
+
+-- Allow player to toggle tags on/off with keybind (F6)
+Config.AllowClientToggle = true
+
+-----------------------------------------------------
+-- SQL PERSISTENCE (NEW)
+-----------------------------------------------------
+Config.UseSQL = true     -- will load/save tags across restarts
+
+-- SQL Table name
+Config.SQLTable = "radiant_tags"
+
+-----------------------------------------------------
+-- DEFAULT STYLE + OVERRIDES
+-----------------------------------------------------
+-- Default fallback style if no forced/discord/ui choice applies
+-- Options: "solid", "lr", "tb", "outline", "pulse"
 Config.DefaultTagStyle = "solid"
 
--- Server-wide enforcement (if true, player UI cannot change style)
+-- If true: no one can pick their style in the UI
 Config.GlobalStyleLock = false
 
--- Discord-based auto styles (used in upgrade)
+-----------------------------------------------------
+-- DISCORD ROLE → STYLE (Priority 2)
+-----------------------------------------------------
+-- Discord roles that FORCE tag style
+-- These override UI but not ACE
 Config.DiscordStyleMap = {
     -- ["ROLE_ID"] = "lr",
     -- ["ROLE_ID"] = "tb",
@@ -80,4 +97,33 @@ Config.DiscordStyleMap = {
     -- ["ROLE_ID"] = "pulse"
 }
 
--- ACE-based forced st
+-----------------------------------------------------
+-- ACE → STYLE OVERRIDE (Priority 1 — Highest)
+-----------------------------------------------------
+-- ACE groups that FORCE a tag style ALWAYS
+Config.ACEStyleMap = {
+    -- ["god"] = "pulse",
+    -- ["owner"] = "lr",
+    -- ["admin"] = "outline"
+}
+
+-----------------------------------------------------
+-- DEPARTMENT AUTO-TAGS (from Discord roles)
+-----------------------------------------------------
+Config.DepartmentAutoTags = {
+    -- ["ROLE_ID"] = "LSPD",
+    -- ["ROLE_ID"] = "BCSO",
+    -- ["ROLE_ID"] = "SAFR",
+    -- ["ROLE_ID"] = "DISPATCH"
+}
+
+-----------------------------------------------------
+-- WEBHOOK LOGGING
+-----------------------------------------------------
+Config.Webhooks = {
+    PlayerJoin = "https://discord.com/api/webhooks/1441712129425277020/cY7qmkYveEfZrP6Ps5FnRJuNgYloHsB3qITe33y0Ld1crCH5WbbEJjyROdfcOTOFEZJJ",
+
+    -- NEW: Tag Change Logging
+    TagChanged = "",   -- <--- fill in optional webhook for tag-edit logs
+}
+

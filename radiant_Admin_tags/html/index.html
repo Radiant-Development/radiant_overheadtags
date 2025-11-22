@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="menu">
-        <h1>Radiant Overhead Tags</h1>
+        <div class="header">Radiant Overhead Tags</div>
 
         <label>Tag Text</label>
-        <input id="tagText" type="text" placeholder="OWNER / DEV / LSPD 302">
+        <input id="tagText" maxlength="24" type="text" placeholder="OWNER / DEV / LSPD 302">
 
-        <label>Color</label>
-        <input id="color" type="color" value="#ffffff">
+        <label>Tag Style</label>
+        <select id="style">
+            <option value="solid">Solid Color</option>
+            <option value="lr">Left → Right Gradient</option>
+        </select>
 
-        <button id="save">Save</button>
-        <button id="close">Cancel</button>
+        <div class="color-section">
+            <label>Primary Color</label>
+            <input id="color1" type="color" value="#ffffff">
+        </div>
+
+        <div class="color-section" id="secondaryColorSection">
+            <label>Secondary Color</label>
+            <input id="color2" type="color" value="#ff0000">
+        </div>
+
+        <div id="errorBox"></div>
+
+        <button id="save">Save Tag</button>
+        <button id="cancel">Cancel</button>
     </div>
 
     <script src="script.js"></script>

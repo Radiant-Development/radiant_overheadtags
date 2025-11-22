@@ -4,113 +4,114 @@
 ██████  ███████ ██   ██ ██ ███████ ██ ██  ██    ██   
 ██   ██ ██   ██ ██   ██ ██ ██   ██ ██  ██ ██    ██   
 ██   ██ ██   ██ ██████  ██ ██   ██ ██   ████    ██    
-      R A D I A N T   D E V E L O P M E N T — VERSION CHECK
+        R A D I A N T   D E V E L O P M E N T
 ]]
 
----------------------------------------------
--- CONFIG (SET YOUR GITHUB RAW VERSION.JSON)
----------------------------------------------
-local resource     = GetCurrentResourceName()
-local localVersion = "1.0.0"
-
--- ⚠️ IMPORTANT: Replace this with your RAW GitHub link!
-local githubURL    = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/refs/heads/main/radiant_Admin_tags/verson.json"
-
-
----------------------------------------------
--- ANIMATED PRINT FUNCTION
----------------------------------------------
--- SAFE ANIMATED PRINT (LINE-BASED, NOT CHARACTER-BASED)
-local function aprint(text)
-    Wait(50)
-    print(text)
-end
-
-
-
----------------------------------------------
--- MULTILINE RADIANT LOGO (GLOW EFFECT)
----------------------------------------------
-local radiantLogo = [[
-^6██████   █████  ██████  ██  █████  ███    ██ ████████^0
-^6██   ██ ██   ██ ██   ██ ██ ██   ██ ████   ██    ██   ^0
-^6██████  ███████ ██   ██ ██ ███████ ██ ██  ██    ██   ^0
-^6██   ██ ██   ██ ██   ██ ██ ██   ██ ██  ██ ██    ██   ^0
-^6██   ██ ██   ██ ██████  ██ ██   ██ ██   ████    ██   ^0
-                ^6R A D I A N T   D E V E L O P M E N T^0
-]]
-
-
----------------------------------------------
--- RESOURCE UPTIME TRACKER
----------------------------------------------
+local resourceName = GetCurrentResourceName()
+local localVersion = "1.0.0"  -- YOUR SCRIPT VERSION HERE
 local startTime = os.time()
 
+---------------------------------------------------------------------
+--  CONFIG: YOUR RAW GITHUB URL
+---------------------------------------------------------------------
+local githubURL = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/refs/heads/main/radiant_Admin_tags/verson.json"
+
+---------------------------------------------------------------------
+--  COLOR HELPERS
+---------------------------------------------------------------------
+local C = {
+    r = "^1", g = "^2", y = "^3", b = "^4",
+    p = "^5", c = "^6", w = "^7", reset = "^0"
+}
+
+---------------------------------------------------------------------
+--  ANIMATED PRINT
+---------------------------------------------------------------------
+local function slowPrint(text, delay)
+    delay = delay or 15
+    for i = 1, #text do
+        print(text:sub(i,i))
+        Wait(delay)
+    end
+end
+
+---------------------------------------------------------------------
+--  LEFT BORDER PRINTER
+---------------------------------------------------------------------
+local function borderLine()
+    print(C.b .. "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" .. C.reset)
+end
+
+---------------------------------------------------------------------
+--  UPTIME
+---------------------------------------------------------------------
 local function getUptime()
     local seconds = os.time() - startTime
-    local mins = math.floor(seconds / 60)
-    local hours = math.floor(mins / 60)
-    mins = mins % 60
-    seconds = seconds % 60
-
-    return string.format("%02dh %02dm %02ds", hours, mins, seconds)
+    local h = math.floor(seconds / 3600)
+    local m = math.floor((seconds % 3600) / 60)
+    local s = seconds % 60
+    return string.format("%02dh %02dm %02ds", h, m, s)
 end
 
-
----------------------------------------------
--- FINAL RADIANT PANEL PRINTER
----------------------------------------------
-local function radiantPanel(localVersion, latest, versionStatus, buildText)
-    print("\n^6████████████████████████ RADIANT DEV CHECK ████████████████████████^0")
-    print(radiantLogo)
-
-    local icon_version = (versionStatus:find("Up%-to%-date") and "^2✔^0") or "^1✖^0"
-    local icon_build   = (buildText:find("SUPPORTED") and "^2✔^0") or "^1⚠^0"
-
-    local recommend = ""
-    if icon_version == "^1✖^0" then
-        recommend = "^1⚠ RECOMMENDED UPDATE AVAILABLE — PLEASE UPDATE SOON ⚠^0"
-    end
-
-    aprint("^5█^0  Resource           → ^7" .. resource)
-    aprint("^5█^0  Installed Version  → ^7" .. localVersion .. " (" .. icon_version .. " " .. versionStatus .. "^0)")
-    aprint("^5█^0  Latest Version     → ^7" .. latest)
-    aprint("^5█^0  Game Build         → ^7" .. buildText .. " " .. icon_build)
-    aprint("^5█^0  Uptime             → ^7" .. getUptime())
-    aprint("^5█^0  Support Hub        → ^7discord.gg/radiantdev")
-
-    if recommend ~= "" then
-        aprint("^5█^0  " .. recommend)
-    end
-
-    print("^6████████████████████████ END OF STATUS ███████████████████████████^0\n")
-end
-
-
----------------------------------------------
--- VERSION CHECK THREAD
----------------------------------------------
+---------------------------------------------------------------------
+--  VERSION CHECK
+---------------------------------------------------------------------
 CreateThread(function()
+
+    Wait(1500)
+
+    -- Fetch GitHub version.json
     PerformHttpRequest(githubURL, function(code, data)
-        local build = tonumber(GetConvarInt("sv_enforceGameBuild", 0))
-        local supported = build >= 2699
+        local latest = "UNKNOWN"
+        local status = C.y .. "CHECK FAILED" .. C.reset
+        local isOutdated = false
 
-        local buildText = supported
-            and ("^2SUPPORTED^0 (Build " .. build .. ")")
-            or ("^1UNSUPPORTED^0 (Build " .. build .. ")")
-
-        if code ~= 200 then
-            radiantPanel(localVersion, "UNKNOWN", "^1UNKNOWN^0", buildText)
-            return
+        if code == 200 then
+            local decoded = json.decode(data)
+            if decoded and decoded.version then
+                latest = decoded.version
+                if latest ~= localVersion then
+                    isOutdated = true
+                    status = C.r .. "OUTDATED" .. C.reset
+                else
+                    status = C.g .. "UP-TO-DATE" .. C.reset
+                end
+            end
         end
 
-        local decoded = json.decode(data)
-        local latest = decoded.version or "UNKNOWN"
+        ------------------------------------------------------------------
+        -- GAME BUILD CHECK
+        ------------------------------------------------------------------
+        local build = tonumber(GetConvar("sv_enforceGameBuild", "0")) or 0
+        local buildText = ""
+        if build < 2699 then
+            buildText = C.r .. "UNSUPPORTED (" .. build .. ")" .. C.reset
+        else
+            buildText = C.g .. "SUPPORTED (" .. build .. ")" .. C.reset
+        end
 
-        local versionStatus =
-            (localVersion == latest and "^2Up-to-date^0")
-            or "^1Outdated^0"
+        ------------------------------------------------------------------
+        --  PRINT PANEL
+        ------------------------------------------------------------------
+        borderLine()
+        slowPrint(C.p .. " R A D I A N T   D E V   V E R S I O N   C H E C K " .. C.reset, 5)
+        borderLine()
 
-        radiantPanel(localVersion, latest, versionStatus, buildText)
+        print(C.w .. "Resource:      " .. C.b .. resourceName .. C.reset)
+        print(C.w .. "Installed:     " .. C.c .. localVersion .. C.reset)
+        print(C.w .. "Latest:        " .. C.b .. latest .. C.reset)
+        print(C.w .. "Status:        " .. status)
+        print(C.w .. "Game Build:    " .. buildText)
+        print(C.w .. "Uptime:        " .. C.y .. getUptime() .. C.reset)
+
+        if isOutdated then
+            print(C.r .. "RECOMMENDED UPDATE AVAILABLE!" .. C.reset)
+        end
+
+        borderLine()
+        print(C.c .. " Support: https://discord.gg/radiantdev " .. C.reset)
+        borderLine()
+        print("")
     end)
+
 end)
