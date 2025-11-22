@@ -5,24 +5,20 @@
 Config = {}
 
 -----------------------------------------------------
--- DISCORD BOT SETTINGS
+-- ⚙️ DISCORD BOT SETTINGS
 -----------------------------------------------------
 Config.Discord = {
-    BotToken = "YOUR BOT TOKEN HERE",
-    GuildID  = "YOUR GUILD ID HERE",
+    BotToken = "YOUR_BOT_TOKEN_HERE",
+    GuildID  = "YOUR_GUILD_ID_HERE",
 
+    -- Map Discord Role IDs → Permission Groups
     RoleMap = {
-         ["0000000000000000"] = "god",   -- example role
+        ["000000000000000000"] = "god",   -- Example
     }
 }
 
-
-
-
-
-
 -----------------------------------------------------
--- ACE PERMISSIONS
+-- 🔐 ACE PERMISSIONS
 -----------------------------------------------------
 Config.ACE = {
     RequireEntries = true,
@@ -33,7 +29,7 @@ Config.ACE = {
 }
 
 -----------------------------------------------------
--- TAG SYSTEM PERMISSION REQUIREMENTS
+-- 🛡️ TAG MENU PERMISSION REQUIREMENTS
 -----------------------------------------------------
 Config.Permission = {
     RequiredACE = "god",
@@ -41,7 +37,7 @@ Config.Permission = {
 }
 
 -----------------------------------------------------
--- DEBUG SETTINGS
+-- 🧪 DEBUG SETTINGS
 -----------------------------------------------------
 Config.Debug = {
     ShowRolePull = true,
@@ -50,45 +46,51 @@ Config.Debug = {
 }
 
 -----------------------------------------------------
--- TAG LENGTH, COOLDOWN, DISTANCE
+-- 📝 TAG RULES & VISIBILITY SETTINGS
 -----------------------------------------------------
-Config.MaxTagLength = 24
-Config.TagChangeCooldown = 5
-Config.DrawDistance = 35.0
+Config.MaxTagLength       = 24
+Config.TagChangeCooldown  = 5
+Config.DrawDistance       = 35.0
 Config.RequireLineOfSight = true
-Config.AllowClientToggle = true
+Config.AllowClientToggle  = true
 
 -----------------------------------------------------
--- SQL PERSISTENCE
+-- 💾 SQL DATABASE SETTINGS
 -----------------------------------------------------
-Config.UseSQL = true
+Config.UseSQL   = true
 Config.SQLTable = "radiant_tags"
 
 -----------------------------------------------------
--- DEFAULT STYLE
+-- 🎨 DEFAULT TAG STYLE CONFIG
 -----------------------------------------------------
 Config.DefaultTagStyle = "solid"
 Config.GlobalStyleLock = false
 
 -----------------------------------------------------
--- DISCORD ROLE → STYLE OVERRIDES
+-- 🎨 DISCORD → STYLE OVERRIDES
 -----------------------------------------------------
-Config.DiscordStyleMap = {}
+Config.DiscordStyleMap = {
+    -- ["ROLE_ID"] = "pulse",
+}
 
 -----------------------------------------------------
--- ACE → STYLE OVERRIDES
+-- 🎨 ACE → STYLE OVERRIDES
 -----------------------------------------------------
-Config.ACEStyleMap = {}
+Config.ACEStyleMap = {
+    -- ["god"] = "outline",
+}
 
 -----------------------------------------------------
--- DEPARTMENT AUTO-TAGS
+-- 🚔 DEPARTMENT AUTO-TAGS
 -----------------------------------------------------
-Config.DepartmentAutoTags = {}
+Config.DepartmentAutoTags = {
+    -- ["ROLE_ID"] = "LSPD",
+}
 
 -----------------------------------------------------
--- WEBHOOK LOGGING
+-- 🌐 WEBHOOKS
 -----------------------------------------------------
 Config.Webhooks = {
-    PlayerJoin = "https://discord.com/api/webhooks/1441712129425277020/cY7qmkY...",
+    PlayerJoin = "",
     TagChanged = ""
 }
