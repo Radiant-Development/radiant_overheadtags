@@ -1,0 +1,29 @@
+body {
+    background: rgba(0,0,0,0.45);
+    font-family: Arial;
+}
+#menu {
+    width: 350px;
+    background: #1e1e1e;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 12% auto;
+    text-align: center;
+    box-shadow: 0 0 20px #000;
+}
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 6px;
+}
+button {
+    background: #ff5555;
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background: #ff3434;
+}
