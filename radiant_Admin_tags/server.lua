@@ -11,7 +11,7 @@ local tags = {}
 local cooldowns = {}
 
 -----------------------------------------------------
--- VERSION CHECK (FIXED & CLEAN)
+-- VERSION CHECK (FINAL FIXED)
 -----------------------------------------------------
 CreateThread(function()
     Wait(1500)
@@ -20,6 +20,7 @@ CreateThread(function()
 
     PerformHttpRequest(versionURL, function(code, body)
         local latest = "UNKNOWN"
+
         if code == 200 and body then
             local decoded = json.decode(body)
             latest = decoded and decoded.version or "UNKNOWN"
@@ -30,12 +31,14 @@ CreateThread(function()
             or (latest == localVersion) and "^2UP-TO-DATE ✓^0"
             or "^3OUTDATED → UPDATE AVAILABLE^0"
 
-        local build = GetGameBuildNumber() or 0
+        -- FIXED GAME BUILD DETECTION
+        local build = tonumber(GetConvarInt("sv_enforceGameBuild", 0))
         local buildText =
-            (build == 0) and "^3UNKNOWN (FiveM returned nil)^0"
+            (build == 0) and "^3UNKNOWN (sv_enforceGameBuild not set)^0"
             or (build < 2699) and ("^1UNSUPPORTED (must be ≥ 2699)^0")
             or ("^2SUPPORTED (" .. build .. ")^0")
 
+        -- uptime
         local uptime = os.time() - startTime
         local h = math.floor(uptime / 3600)
         local m = math.floor((uptime % 3600) / 60)
@@ -168,10 +171,8 @@ local function GetDiscordRoles(src)
     local p = promise.new()
 
     PerformHttpRequest(url, function(code, data)
-        if code ~= 200 then
-            p:resolve({})
-            return
-        end
+        if code ~= 200 then return p:resolve({}) end
+
         local decoded = json.decode(data or "{}")
         p:resolve(decoded and decoded.roles or {})
     end, "GET", "", {
@@ -185,9 +186,12 @@ end
 -- PERMISSION CHECK
 -----------------------------------------------------
 local function HasPermissions(src)
-    local requiredACE = Config.Permission.RequiredACE
-    if IsPlayerAceAllowed(src, "group." .. requiredACE) then return true end
+    -- ACE match
+    if IsPlayerAceAllowed(src, "group." .. Config.Permission.RequiredACE) then
+        return true
+    end
 
+    -- Discord role match
     local roles = GetDiscordRoles(src)
     for _, r in ipairs(roles) do
         if Config.Discord.RoleMap[r] == Config.Permission.RequiredDiscord then
@@ -206,16 +210,14 @@ AddEventHandler("playerConnecting", function()
     local license = GetLicense(src)
 
     CreateThread(function()
-        Wait(500)
-
+        Wait(400)
         tags[src] = LoadPlayerTag(license) or {}
-
         TriggerClientEvent("radiant:tags:updateAll", -1, tags)
     end)
 end)
 
 -----------------------------------------------------
--- TAG MENU COMMAND
+-- /tagmenu COMMAND
 -----------------------------------------------------
 RegisterCommand("tagmenu", function(src)
     if not HasPermissions(src) then
@@ -227,7 +229,7 @@ RegisterCommand("tagmenu", function(src)
 end)
 
 -----------------------------------------------------
--- SAVE TAG FROM UI
+-- SAVE TAG
 -----------------------------------------------------
 RegisterNetEvent("radiant:tags:setTag", function(payload)
     local src = source

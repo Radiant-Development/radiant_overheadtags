@@ -1,101 +1,84 @@
 body {
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     font-family: Arial, sans-serif;
 }
 
-/* Hidden by default */
+/* Main UI panel */
 #menu {
     display: none;
     width: 420px;
-    background: #161616;
-    color: white;
-    padding: 22px;
+    background: linear-gradient(180deg, #111, #1a1a1a);
+    border: 1px solid #ff2a2a;
     border-radius: 12px;
     margin: 8% auto;
-    border: 1px solid rgba(255, 40, 40, 0.22);
-    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    padding: 25px;
+    box-shadow: 0 0 25px #ff000055;
     animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
 .header {
+    font-size: 24px;
     text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 18px;
+    color: #ff4444;
+    margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 40, 40, 0.25);
+    border-bottom: 1px solid #333;
 }
 
 label {
-    display: block;
     margin-top: 12px;
-    color: #d0d0d0;
+    display: block;
+    color: #d1d1d1;
     font-size: 14px;
 }
 
 input, select {
     width: 100%;
-    margin-top: 6px;
     padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
     background: #222;
     border: 1px solid #333;
     color: white;
-    font-size: 14px;
-    border-radius: 6px;
-    outline: none;
-}
-
-input:focus, select:focus {
-    border-color: #ff4545;
-}
-
-.color-section {
-    margin-top: 10px;
-}
-
-.button-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 18px;
 }
 
 button {
-    width: 48%;
+    width: 49%;
     padding: 12px;
     border-radius: 6px;
-    border: none;
+    background: #222;
+    border: 1px solid #333;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
+    color: white;
+    margin-top: 18px;
     transition: 0.15s;
 }
 
 #save {
-    background: #d82b2b;
-    color: white;
-    box-shadow: 0 0 6px rgba(255,0,0,0.4);
-}
-#save:hover {
-    background: #b92222;
-    box-shadow: 0 0 10px rgba(255,0,0,0.7);
+    background: #ff3232;
+    border: 1px solid #ff5555;
 }
 
-#cancel {
-    background: #444;
-    color: white;
+#save:hover {
+    background: #dd2626;
 }
+
 #cancel:hover {
     background: #333;
 }
 
+.color-section {
+    margin-top: 12px;
+}
+
 #errorBox {
-    min-height: 20px;
-    margin-top: 10px;
+    margin-top: 12px;
+    color: #ff4444;
     font-size: 14px;
-    color: #ff6060;
+    min-height: 20px;
 }

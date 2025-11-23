@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
+    <title>Radiant Overhead Tags</title>
 </head>
 
 <body>
     <div id="menu">
-
         <div class="header">Radiant Overhead Tags</div>
 
-        <!-- ROLE DROPDOWN -->
-        <label>Tag Role</label>
+        <!-- ROLE SELECT -->
+        <label for="roleDropdown">Tag Role</label>
         <select id="roleDropdown"></select>
 
-        <!-- SUB-MESSAGE -->
-        <label>Extra Message (Optional)</label>
-        <input id="subMessage" maxlength="48" type="text" placeholder="Working on development…">
+        <!-- SUB MESSAGE -->
+        <label for="subMessage">Sub-Message</label>
+        <input id="subMessage" maxlength="48" type="text" placeholder="Optional message...">
 
-        <!-- STYLE -->
-        <label>Tag Style</label>
+        <!-- STYLE SELECT -->
+        <label for="style">Tag Style</label>
         <select id="style">
-            <option value="solid">Solid</option>
-            <option value="lr">Gradient (Left → Right)</option>
+            <option value="solid">Solid Color</option>
+            <option value="lr">Left → Right Gradient</option>
         </select>
 
         <!-- COLORS -->
@@ -36,14 +36,12 @@
             <input id="color2" type="color" value="#ff0000">
         </div>
 
-        <!-- ERROR BOX -->
+        <!-- ERROR -->
         <div id="errorBox"></div>
 
         <!-- BUTTONS -->
-        <div class="button-row">
-            <button id="save">Save</button>
-            <button id="cancel">Cancel</button>
-        </div>
+        <button id="save">Save Tag</button>
+        <button id="cancel">Cancel</button>
     </div>
 
     <script src="script.js"></script>
