@@ -2,19 +2,30 @@
 -- R A D I A N T   D E V   S E R V E R
 -----------------------------------------
 
-local resource = GetCurrentResourceName()
+local resource     = GetCurrentResourceName()
 local localVersion = "1.0.0"
-local startTime = os.time()
+local startTime    = os.time()
 
 local Config = Config
-local tags = {}
+local tags   = {}
 local cooldowns = {}
 
------------------------------------------------------
--- VERSION CHECK (FINAL FIXED)
------------------------------------------------------
+---------------------------------------------------------------------
+-- UTIL: FORMAT UPTIME
+---------------------------------------------------------------------
+local function getUptime()
+    local sec = os.time() - startTime
+    local h = math.floor(sec / 3600)
+    local m = math.floor((sec % 3600) / 60)
+    local s = sec % 60
+    return string.format("%02dh %02dm %02ds", h, m, s)
+end
+
+---------------------------------------------------------------------
+-- VERSION CHECK (CLEAN FINAL)
+---------------------------------------------------------------------
 CreateThread(function()
-    Wait(1500)
+    Wait(1400)
 
     local versionURL = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/main/version.json"
 
@@ -23,47 +34,42 @@ CreateThread(function()
 
         if code == 200 and body then
             local decoded = json.decode(body)
-            latest = decoded and decoded.version or "UNKNOWN"
+            if decoded and decoded.version then
+                latest = decoded.version
+            end
         end
 
-        local statusText =
+        local status =
             (latest == "UNKNOWN") and "^3UNKNOWN^0"
             or (latest == localVersion) and "^2UP-TO-DATE ✓^0"
-            or "^3OUTDATED → UPDATE AVAILABLE^0"
+            or "^1OUTDATED ✖^0"
 
-        -- FIXED GAME BUILD DETECTION
         local build = tonumber(GetConvarInt("sv_enforceGameBuild", 0))
         local buildText =
-            (build == 0) and "^3UNKNOWN (sv_enforceGameBuild not set)^0"
-            or (build < 2699) and ("^1UNSUPPORTED (must be ≥ 2699)^0")
-            or ("^2SUPPORTED (" .. build .. ")^0")
-
-        -- uptime
-        local uptime = os.time() - startTime
-        local h = math.floor(uptime / 3600)
-        local m = math.floor((uptime % 3600) / 60)
-        local s = uptime % 60
+            (build == 0) and "^3UNKNOWN (sv_enforceGameBuild missing)^0"
+            or (build >= 2699) and ("^2SUPPORTED (" .. build .. ") ✓^0")
+            or ("^1UNSUPPORTED (" .. build .. ") ✖^0")
 
         print("")
-        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("^4█████████████████████████████████████████████████^0")
         print("^6      🚀 R A D I A N T   D E V   V E R S I O N   C H E C K^0")
-        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
-        print(("  Resource       ➜  ^7%s^0"):format(resource))
-        print(("  Installed      ➜  ^7%s^0"):format(localVersion))
-        print(("  Latest         ➜  ^7%s^0"):format(latest))
-        print(("  Status         ➜  %s"):format(statusText))
-        print(("  Game Build     ➜  %s"):format(buildText))
-        print(("  Uptime         ➜  %02dh %02dm %02ds^0"):format(h, m, s))
-        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("^4█████████████████████████████████████████████████^0")
+        print(("  Resource     ➜  ^7%s^0"):format(resource))
+        print(("  Installed    ➜  ^7%s^0"):format(localVersion))
+        print(("  Latest       ➜  ^7%s^0"):format(latest))
+        print(("  Status       ➜  %s"):format(status))
+        print(("  Game Build   ➜  %s"):format(buildText))
+        print(("  Uptime       ➜  %s^0"):format(getUptime()))
+        print("^4█████████████████████████████████████████████████^0")
         print("  Support ➜ ^5https://discord.gg/radiantdev^0")
-        print("^4━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━^0")
+        print("^4█████████████████████████████████████████████████^0")
         print("")
     end)
 end)
 
------------------------------------------------------
+---------------------------------------------------------------------
 -- GET LICENSE
------------------------------------------------------
+---------------------------------------------------------------------
 local function GetLicense(src)
     for _, id in ipairs(GetPlayerIdentifiers(src)) do
         if id:find("license:") then return id end
@@ -71,35 +77,33 @@ local function GetLicense(src)
     return nil
 end
 
------------------------------------------------------
--- SQL: LOAD TAG
------------------------------------------------------
+---------------------------------------------------------------------
+-- SQL LOAD
+---------------------------------------------------------------------
 local function LoadPlayerTag(license)
     if not Config.UseSQL then return nil end
 
-    local result = MySQL.single.await(
-        ("SELECT * FROM `%s` WHERE license = ?"):format(Config.SQLTable),
-        { license }
-    )
+    local q = ("SELECT * FROM `%s` WHERE license = ?"):format(Config.SQLTable)
+    local r = MySQL.single.await(q, { license })
 
-    if not result then return nil end
+    if not r then return nil end
 
     return {
-        text    = result.tag_text or "",
-        message = result.tag_message or "",
-        color   = { result.color_r, result.color_g, result.color_b },
-        color2  = { result.color_r2, result.color_g2, result.color_b2 },
-        style   = result.style or "solid"
+        text    = r.tag_text or "",
+        message = r.tag_message or "",
+        color   = { r.color_r,  r.color_g,  r.color_b },
+        color2  = { r.color_r2, r.color_g2, r.color_b2 },
+        style   = r.style or "solid"
     }
 end
 
------------------------------------------------------
--- SQL: SAVE TAG
------------------------------------------------------
+---------------------------------------------------------------------
+-- SQL SAVE
+---------------------------------------------------------------------
 local function SavePlayerTag(license, data)
     if not Config.UseSQL then return end
 
-    local sql = string.format([[
+    local q = string.format([[
         INSERT INTO `%s`
         (license, tag_text, tag_message, color_r, color_g, color_b, color_r2, color_g2, color_b2, style)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -115,7 +119,7 @@ local function SavePlayerTag(license, data)
             style       = VALUES(style)
     ]], Config.SQLTable)
 
-    MySQL.update.await(sql, {
+    MySQL.update.await(q, {
         license,
         data.text,
         data.message,
@@ -125,13 +129,13 @@ local function SavePlayerTag(license, data)
     })
 end
 
------------------------------------------------------
--- SQL: CREATE TABLE
------------------------------------------------------
+---------------------------------------------------------------------
+-- SQL INIT
+---------------------------------------------------------------------
 CreateThread(function()
     if not Config.UseSQL then return end
 
-    local sql = string.format([[
+    local q = string.format([[
         CREATE TABLE IF NOT EXISTS `%s` (
             id INT AUTO_INCREMENT PRIMARY KEY,
             license VARCHAR(255) NOT NULL UNIQUE,
@@ -147,15 +151,16 @@ CreateThread(function()
         );
     ]], Config.SQLTable)
 
-    MySQL.query(sql)
+    MySQL.query(q)
     print("^2[RADIANT DEV]^0 SQL table verified.")
 end)
 
------------------------------------------------------
+---------------------------------------------------------------------
 -- DISCORD ROLE FETCH
------------------------------------------------------
+---------------------------------------------------------------------
 local function GetDiscordRoles(src)
     local discordId
+
     for _, id in ipairs(GetPlayerIdentifiers(src)) do
         if id:find("discord:") then
             discordId = id:gsub("discord:", "")
@@ -165,12 +170,16 @@ local function GetDiscordRoles(src)
 
     if not discordId then return {} end
 
-    local url = ("https://discord.com/api/v10/guilds/%s/members/%s"):
-        format(Config.Discord.GuildID, discordId)
+    local url = ("https://discord.com/api/v10/guilds/%s/members/%s")
+        :format(Config.Discord.GuildID, discordId)
 
     local p = promise.new()
 
     PerformHttpRequest(url, function(code, data)
+        if Config.Debug.ShowRolePull then
+            print("^6[ROLE DEBUG]^0 CODE:", code)
+        end
+
         if code ~= 200 then return p:resolve({}) end
 
         local decoded = json.decode(data or "{}")
@@ -182,19 +191,17 @@ local function GetDiscordRoles(src)
     return Citizen.Await(p)
 end
 
------------------------------------------------------
+---------------------------------------------------------------------
 -- PERMISSION CHECK
------------------------------------------------------
+---------------------------------------------------------------------
 local function HasPermissions(src)
-    -- ACE match
     if IsPlayerAceAllowed(src, "group." .. Config.Permission.RequiredACE) then
         return true
     end
 
-    -- Discord role match
     local roles = GetDiscordRoles(src)
-    for _, r in ipairs(roles) do
-        if Config.Discord.RoleMap[r] == Config.Permission.RequiredDiscord then
+    for _, role in ipairs(roles) do
+        if Config.Discord.RoleMap[role] == Config.Permission.RequiredDiscord then
             return true
         end
     end
@@ -202,57 +209,61 @@ local function HasPermissions(src)
     return false
 end
 
------------------------------------------------------
+---------------------------------------------------------------------
 -- PLAYER CONNECT
------------------------------------------------------
-AddEventHandler("playerConnecting", function()
+---------------------------------------------------------------------
+AddEventHandler("playerJoining", function()
     local src = source
-    local license = GetLicense(src)
+    local lic = GetLicense(src)
 
     CreateThread(function()
-        Wait(400)
-        tags[src] = LoadPlayerTag(license) or {}
+        Wait(350)
+
+        tags[src] = LoadPlayerTag(lic) or {}
+
         TriggerClientEvent("radiant:tags:updateAll", -1, tags)
     end)
 end)
 
------------------------------------------------------
--- /tagmenu COMMAND
------------------------------------------------------
+---------------------------------------------------------------------
+-- /tagmenu
+---------------------------------------------------------------------
 RegisterCommand("tagmenu", function(src)
     if not HasPermissions(src) then
-        TriggerClientEvent("chat:addMessage", src, { args = {"^1SYSTEM", "No permission."} })
+        TriggerClientEvent("chat:addMessage", src, {
+            args = {"^1SYSTEM", "You do not have permission."}
+        })
         return
     end
 
     TriggerClientEvent("radiant:tags:openMenu", src)
 end)
 
------------------------------------------------------
--- SAVE TAG
------------------------------------------------------
-RegisterNetEvent("radiant:tags:setTag", function(payload)
+---------------------------------------------------------------------
+-- SAVE TAG FROM UI
+---------------------------------------------------------------------
+RegisterNetEvent("radiant:tags:setTag", function(data)
     local src = source
-    local license = GetLicense(src)
+    local lic = GetLicense(src)
 
     tags[src] = {
-        text    = payload.role,
-        message = payload.message,
-        color   = { payload.r, payload.g, payload.b },
-        color2  = { payload.r2, payload.g2, payload.b2 },
-        style   = payload.style
+        text    = data.role,
+        message = data.message,
+        color   = { data.r, data.g, data.b },
+        color2  = { data.r2, data.g2, data.b2 },
+        style   = data.style
     }
 
-    if Config.UseSQL then
-        SavePlayerTag(license, tags[src])
+    if lic then
+        SavePlayerTag(lic, tags[src])
     end
 
     TriggerClientEvent("radiant:tags:updateAll", -1, tags)
 end)
 
------------------------------------------------------
--- PLAYER DROPPED
------------------------------------------------------
+---------------------------------------------------------------------
+-- CLEANUP ON LEAVE
+---------------------------------------------------------------------
 AddEventHandler("playerDropped", function()
     tags[source] = nil
     TriggerClientEvent("radiant:tags:updateAll", -1, tags)

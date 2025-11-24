@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS `radiant_tags` (
+DROP TABLE IF EXISTS `radiant_tags`;
+
+CREATE TABLE `radiant_tags` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     license VARCHAR(255) NOT NULL UNIQUE,
     tag_text VARCHAR(64),
