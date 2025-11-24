@@ -3,7 +3,7 @@
 -----------------------------------------
 
 local resource     = GetCurrentResourceName()
-local localVersion = "1.0.0"
+local localVersion = "1.0.0.2"
 local startTime    = os.time()
 
 local Config = Config
