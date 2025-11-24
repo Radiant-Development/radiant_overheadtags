@@ -47,8 +47,8 @@ server_scripts {
 -----------------------------------------
 escrow_ignore {
     'config.lua',
-    'html/*',
-    'tags.sql'
+    'tags.sql',
+    'server.lua'
 }
 
 -----------------------------------------
