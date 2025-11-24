@@ -39,7 +39,6 @@ client_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'config.lua',
-    'version.lua',    -- version check file (optional but recommended)
     'server.lua'
 }
 

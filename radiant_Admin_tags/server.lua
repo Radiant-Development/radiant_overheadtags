@@ -17,7 +17,7 @@ local cachedRoles = {}   -- 🔥 Stores Discord roles per player
 CreateThread(function()
     Wait(1200)
 
-    local versionURL = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/main/version.json"
+    local versionURL = "https://raw.githubusercontent.com/Radiant-Development/radiant_overheadtags/refs/heads/main/radiant_Admin_tags/verson.json"
 
     PerformHttpRequest(versionURL, function(code, data)
         local latest = "UNKNOWN"
